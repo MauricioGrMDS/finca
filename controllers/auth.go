@@ -7,14 +7,23 @@ import (
 	"net/http"
 )
 
-// var newAuth models.Auth
+type ErrorResponse struct {
+	Valid bool   `json:"valid"`
+	Error string `json:"error"`
+}
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	var loginReq models.LoginRequest
 	json.NewDecoder(r.Body).Decode(&loginReq)
 	userData, _ := models.GetUserByEmail(loginReq.Email)
 	if userData.Password != loginReq.Password {
-		w.WriteHeader(http.StatusUnauthorized)
+		response := ErrorResponse{
+			Valid: false,
+			Error: "Invalid password",
+		}
+		w.WriteHeader(http.StatusOK)
+		res, _ := json.Marshal(response)
+		w.Write(res)
 		return
 	}
 
